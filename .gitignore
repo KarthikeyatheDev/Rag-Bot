@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+*.sqlite
+*.db
+*.sqlite
+*.sqlite3
+venv/
+env/
+*.env
+.env
+
+# FastAPI / Python tooling
+*.log
+*.pot
+*.pyc
+.pytest_cache/
+
+# Chroma/vector store artifacts
+backend/.env
+backend/test_chroma.py
+backend/chroma_db/
+backend/uploads/
+
+
+# Node / frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.turbo/
+frontend/.vercel/
+frontend/build/
+
+# TypeScript
+*.tsbuildinfo
+
+# Editor files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+BloodHound.md
