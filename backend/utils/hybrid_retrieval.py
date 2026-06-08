@@ -19,17 +19,21 @@ def hybrid_retrieval(
     )
     query_embedding = generate_embedding(message_content)
     query_result = collection.query(
-        query_embeddings=query_embedding,
+        query_embeddings=[query_embedding],
         n_results=5,
         where={"conversation_id": conversation_id},
     )
     documents = query_result.get("documents") or []
-    chroma_chunks = documents[0] if len(documents) > 0 else []
+    chroma_chunks = documents[0] if documents and documents[0] else []
     chunk_texts = [chunk.content for chunk in all_chunks]
-    keyword_chunks = keyword_retrieval(chunk_texts, message_content, top_k=5)
-    hybrid_chunks = list(
-    dict.fromkeys(
-        chroma_chunks + list(keyword_chunks)
-    )
-)
+    if not chunk_texts:
+        return []
+    top_k = min(5, len(chunk_texts))
+    keyword_chunks = keyword_retrieval(chunk_texts, message_content, top_k=top_k) or []
+    hybrid_chunks = list(dict.fromkeys(chroma_chunks + list(keyword_chunks)))
+    # print("CHROMA:", chroma_chunks)
+    # print("BM25:", keyword_chunks)
+    # print("HYBRID:", hybrid_chunks)
+    if not hybrid_chunks:
+        return []
     return hybrid_chunks

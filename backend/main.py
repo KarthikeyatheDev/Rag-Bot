@@ -5,7 +5,7 @@ from click import prompt
 from fastapi import Depends, FastAPI, UploadFile, File
 from sqlalchemy.orm import Session
 
-from backend.utils.reranker import rerank
+
 from database import get_db, engine
 
 from Model import Base, Chunk, Document
@@ -16,6 +16,7 @@ from utils.chunker import chunk_text
 from utils.embeddings import generate_embedding
 from utils.vector_store import collection
 from utils.hybrid_retrieval import hybrid_retrieval
+from utils.reranker import rerank
 
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -107,6 +108,12 @@ def chat(conversation_id: int, message: MessageCreate, db: Session = Depends(get
     try:
         unique_chunks = hybrid_retrieval(conversation_id, message.content, db)
         reranked_chunks = rerank(message.content, unique_chunks, top_k=5)
+        # print("\n--- HYBRID CHUNKS ---")
+        # for i, c in enumerate(unique_chunks):
+        #     print(i, c[:80])
+        # print("\n--- RERANKED CHUNKS ---")
+        # for i, c in enumerate(reranked_chunks):
+        #     print(i, c[:80])
         context = "\n\n".join(reranked_chunks)
         prompt = f"""
 You are a helpful AI assistant.

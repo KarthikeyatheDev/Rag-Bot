@@ -12,12 +12,12 @@ def rerank(query: str, chunks: list[str], top_k: int=5):
     scored_chunks.sort(key=lambda x: x[0], reverse=True)
     return [chunk for score, chunk in scored_chunks[:top_k]]
 
-chunks = [
-    "Python was created by Guido van Rossum",
-    "FastAPI supports dependency injection through Depends()",
-    "A REST API uses HTTP methods"
-]
+# chunks = [
+#     "Python was created by Guido van Rossum",
+#     "FastAPI supports dependency injection through Depends()",
+#     "A REST API uses HTTP methods"
+# ]
 
-query = "How does FastAPI dependency injection work?"
+# query = "How does FastAPI dependency injection work?"
 
-print(rerank(query, chunks))
+# print(rerank(query, chunks))

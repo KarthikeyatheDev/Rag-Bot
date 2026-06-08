@@ -20,6 +20,7 @@ env/
 *.pyc
 .pytest_cache/
 
+
 # Chroma/vector store artifacts
 backend/.env
 backend/test_chroma.py
