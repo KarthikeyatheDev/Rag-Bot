@@ -1,5 +1,5 @@
 import bm25s
-from typing import List, cast
+from typing import List
 
 
 def keyword_retrieval(all_chunks, query, top_k=2):
@@ -14,8 +14,4 @@ def keyword_retrieval(all_chunks, query, top_k=2):
 
     query_tokens = bm25s.tokenize([query])
     results, scores = retriever.retrieve(query_tokens, corpus=all_chunks, k=top_k)
-    # print(type(results), type(scores))
     return list(results[0])
-
-
-# keyword_retrieval(["The car is parked outside.", "The dog is sleeping.", "Python is a programming language."], "automobile", top_k=2)

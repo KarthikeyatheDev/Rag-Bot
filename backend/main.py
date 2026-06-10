@@ -15,8 +15,8 @@ from utils.extractor import extract_text
 from utils.chunker import chunk_text
 from utils.embeddings import generate_embedding
 from utils.vector_store import collection
-from utils.hybrid_retrieval import hybrid_retrieval
-from utils.reranker import rerank
+from utils.redis_client import get_cache, set_cache
+from utils.rag_orchestrator import rag_pipeline
 
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -88,6 +88,9 @@ def get_messages(conversation_id: int, db: Session = Depends(get_db)):
 @app.post("/chat/{conversation_id}")
 def chat(conversation_id: int, message: MessageCreate, db: Session = Depends(get_db)):
 
+    cache_key = f"chat:{conversation_id}:{message.content}"
+    cached_response = get_cache(cache_key)
+
     user_message = Message(
         role="user", content=message.content, conversation_id=conversation_id
     )
@@ -104,37 +107,28 @@ def chat(conversation_id: int, message: MessageCreate, db: Session = Depends(get
         .order_by(Message.id.asc())
         .all()
     )
+    if cached_response:
+
+        assistant_message = Message(
+            role="assistant", content=cached_response, conversation_id=conversation_id
+        )
+        db.add(assistant_message)
+        db.commit()
+        db.refresh(assistant_message)
+        return assistant_message
 
     try:
-        unique_chunks = hybrid_retrieval(conversation_id, message.content, db)
-        reranked_chunks = rerank(message.content, unique_chunks, top_k=5)
-        # print("\n--- HYBRID CHUNKS ---")
-        # for i, c in enumerate(unique_chunks):
-        #     print(i, c[:80])
-        # print("\n--- RERANKED CHUNKS ---")
-        # for i, c in enumerate(reranked_chunks):
-        #     print(i, c[:80])
-        context = "\n\n".join(reranked_chunks)
-        prompt = f"""
-You are a helpful AI assistant.
+        result = rag_pipeline(
+            conversation_id=conversation_id,
+            message_content=message.content,
+            db=db,
+            model=model_name,
+            client=client,
+            conversation_history=conversation,
+        )
+        assistant_content = result["response"]
 
-Answer the user's question
-using the provided context.
-
-If the answer is not present
-in the context, say you do not know.
-
-Context:
-{context}
-
-Conversation History:
-"""
-        for msg in conversation:
-            role = "Assistant" if str(msg.role) == "assistant" else "User"
-            prompt += f"{role}: {msg.content}\n"
-        prompt += "Assistant:"
-        response = client.models.generate_content(model=model_name, contents=prompt)
-        assistant_content = response.text
+        set_cache(cache_key, assistant_content, ttl=3600)
     except Exception as e:
         assistant_content = f"Error: {str(e)}"
 
