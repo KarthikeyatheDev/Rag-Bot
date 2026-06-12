@@ -1,5 +1,8 @@
 from email import message
 import shutil
+import os
+import uuid
+
 
 from click import prompt
 from fastapi import Depends, FastAPI, UploadFile, File
@@ -150,10 +153,15 @@ def upload_file(
     conversation_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)
 ):
 
-    file_path = f"uploads/{file.filename}"
+    UPLOAD_DIR = "/app/uploads"
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+    safe_filename = f"{uuid.uuid4()}_{file.filename}"
+    file_path = os.path.join(UPLOAD_DIR, safe_filename)
 
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
+
     content = extract_text(file_path, str(file.filename))
     chunks = chunk_text(content)
     document = Document(
@@ -178,6 +186,7 @@ def upload_file(
         )
         db.add(chunk_entry)
         db.flush()
+
         collection.add(
             documents=[chunk],
             embeddings=[embedding],

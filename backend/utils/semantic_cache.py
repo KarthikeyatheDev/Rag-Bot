@@ -5,7 +5,7 @@ from utils.vector_store import chroma_client
 
 semantic_cache = chroma_client.get_or_create_collection(name="semantic-cache")
 
-SIMILARITY_THRESHOLD = 0.90
+SIMILARITY_THRESHOLD = 0.85
 
 
 def get_semantic_cache(query_embedding, conversation_id):
