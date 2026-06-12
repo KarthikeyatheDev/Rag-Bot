@@ -20,6 +20,8 @@ from utils.embeddings import generate_embedding
 from utils.vector_store import collection
 from utils.redis_client import get_cache, set_cache
 from utils.rag_orchestrator import rag_pipeline
+from fastapi import Request
+from utils.rate_limiter import check_rate_limit
 
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -60,6 +62,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def rate_limit_middleware(request, call_next):
+
+    if request.url.path.startswith("/chat"):
+        check_rate_limit(request)
+
+    response = await call_next(request)
+
+    return response
 
 
 @app.get("/conversations")
