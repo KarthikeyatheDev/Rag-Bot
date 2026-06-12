@@ -14,7 +14,7 @@ jobs:
 backend-build:
 runs-on: ubuntu-latest
 
-```
+
 defaults:
   run:
     working-directory: backend
@@ -39,12 +39,12 @@ steps:
   - name: Build Backend Docker Image
     run: |
       docker build -t rag-backend .
-```
+
 
 frontend-build:
 runs-on: ubuntu-latest
 
-```
+
 defaults:
   run:
     working-directory: frontend
@@ -66,4 +66,3 @@ steps:
 
   - name: Build Frontend Docker Image
     run: docker build -t rag-frontend .
-```
