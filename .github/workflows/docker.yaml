@@ -1,68 +1,64 @@
 name: Build Docker Images for RAG Application
 
 on:
-push:
-branches:
-- main
+  push:
+    branches:
+      - main
 
-pull_request:
-branches:
-- main
+  pull_request:
+    branches:
+      - main
 
 jobs:
+  backend-build:
+    runs-on: ubuntu-latest
 
-backend-build:
-runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
 
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-defaults:
-  run:
-    working-directory: backend
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-steps:
-  - name: Checkout Repository
-    uses: actions/checkout@v4
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
 
-  - name: Setup Python
-    uses: actions/setup-python@v5
-    with:
-      python-version: "3.11"
+      - name: Verify Imports
+        run: |
+          python -m py_compile main.py
 
-  - name: Install Dependencies
-    run: |
-      pip install -r requirements.txt
+      - name: Build Backend Docker Image
+        run: |
+          docker build -t rag-backend .
 
-  - name: Verify Imports
-    run: |
-      python -m py_compile main.py
+  frontend-build:
+    runs-on: ubuntu-latest
 
-  - name: Build Backend Docker Image
-    run: |
-      docker build -t rag-backend .
+    defaults:
+      run:
+        working-directory: frontend
 
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-frontend-build:
-runs-on: ubuntu-latest
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
+      - name: Install Dependencies
+        run: npm install
 
-defaults:
-  run:
-    working-directory: frontend
+      - name: Build Frontend
+        run: npm run build
 
-steps:
-  - name: Checkout Repository
-    uses: actions/checkout@v4
-
-  - name: Setup Node
-    uses: actions/setup-node@v4
-    with:
-      node-version: 22
-
-  - name: Install Dependencies
-    run: npm install
-
-  - name: Build Frontend
-    run: npm run build
-
-  - name: Build Frontend Docker Image
-    run: docker build -t rag-frontend .
+      - name: Build Frontend Docker Image
+        run: docker build -t rag-frontend .
