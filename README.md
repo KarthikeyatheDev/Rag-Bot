@@ -1,23 +1,51 @@
-# RAG Bot
+# RAG Bot 🤖
 
-A Retrieval-Augmented Generation (RAG) chat application that allows users to upload documents and ask questions about them. The system retrieves relevant document content and uses Google's Gemini API to generate context-aware responses.
+A Retrieval-Augmented Generation (RAG) chatbot that allows users to upload PDF and TXT documents and interact with them using natural language.
+
+The application combines semantic vector search, keyword retrieval, reranking, caching, and Google's Gemini API to provide accurate, context-aware responses from uploaded documents.
 
 ## Features
 
-* Upload and index documents
-* Semantic search using embeddings
-* BM25 keyword search
-* Hybrid retrieval with re-ranking
-* Context-aware AI responses
-* Conversation history management
+* 📄 Upload and chat with PDF and TXT documents
+* 🔍 Hybrid retrieval using vector search and BM25 keyword search
+* 🎯 Neural reranking for improved context selection
+* ⚡ Redis-powered caching for faster responses and reduced API usage
+* 🛡️ IP-based rate limiting
+* 💬 Persistent conversation history
+* 🐳 Fully containerized with Docker Compose
+* 📱 Responsive web interface built with Next.js
+
+## Architecture
+
+```text
+Frontend (Next.js)
+        │
+        ▼
+Backend (FastAPI)
+        │
+        ├── SQLite (Conversations & Metadata)
+        ├── Redis (Caching & Rate Limiting)
+        └── Retrieval Pipeline
+                │
+                ├── ChromaDB Vector Search
+                ├── BM25 Keyword Search
+                └── Cross-Encoder Reranker
+                        │
+                        ▼
+                  Gemini 2.5 Flash
+```
 
 ## Tech Stack
 
 ### Backend
 
 * FastAPI
-* SQLite + SQLAlchemy
+* SQLAlchemy
+* SQLite
 * ChromaDB
+* Redis
+* Sentence Transformers
+* BM25s
 * Google Gemini API
 
 ### Frontend
@@ -27,108 +55,106 @@ A Retrieval-Augmented Generation (RAG) chat application that allows users to upl
 * TypeScript
 * Tailwind CSS
 
+### Infrastructure
+
+* Docker
+* Docker Compose
+
+## Retrieval Pipeline
+
+1. User uploads a PDF or TXT document.
+2. Text is extracted and split into chunks.
+3. Chunks are embedded using a Sentence Transformer model.
+4. Embeddings are stored in ChromaDB.
+5. BM25 indexes are created for keyword retrieval.
+6. User queries trigger both vector and keyword search.
+7. Retrieved results are merged and reranked.
+8. The top-ranked context is sent to Gemini for response generation.
+
 ## Project Structure
 
 ```text
 rag-bot/
 ├── backend/
 │   ├── main.py
-│   ├── Model.py
-│   ├── schema.py
 │   ├── database.py
+│   ├── schema.py
+│   ├── Model.py
 │   └── utils/
-│
 ├── frontend/
 │   ├── app/
 │   ├── components/
-│   └── public/
-│
+│   └── package.json
+├── docker-compose.yml
 └── README.md
 ```
 
-## How It Works
+## Getting Started
 
-```text
-Document Upload
-      ↓
-Text Extraction
-      ↓
-Chunking
-      ↓
-Embedding Generation
-      ↓
-Storage (ChromaDB + SQLite)
+### Prerequisites
 
-User Query
-      ↓
-Hybrid Retrieval
-(Vector Search + BM25)
-      ↓
-Re-ranking
-      ↓
-Gemini Response
-```
+* Docker & Docker Compose
 
-## Setup
+### Environment Variables
 
-### Backend
-
-```bash
-cd backend
-
-python -m venv venv
-
-# Windows
-venv\Scripts\activate
-
-# Linux/macOS
-source venv/bin/activate
-
-pip install -r requirements.txt
-```
-
-Create a `.env` file:
+Create a `.env` file inside the `backend` directory:
 
 ```env
 GEMINI_API_KEY=your_api_key
-DATABASE_URL=sqlite:///./rag_bot.db
+DATABASE_URL=sqlite:///./data/chat.db
 ```
 
-### Frontend
+### Run with Docker
 
 ```bash
-cd frontend
-npm install
+docker compose up --build
 ```
 
-## Run
+Services:
 
-### Backend
+* Frontend: http://localhost:3000
+* Backend: http://localhost:8000
+* API Docs: http://localhost:8000/docs
 
-```bash
-cd backend
-uvicorn main:app --reload
+## API Overview
+
+### Conversations
+
+```http
+GET  /conversations
+POST /conversations
 ```
 
-### Frontend
+### Documents
 
-```bash
-cd frontend
-npm run dev
+```http
+POST /upload/{conversation_id}
 ```
 
-Open: `http://localhost:3000`
+### Messages
 
-## Architecture
-
-```text
-Frontend (Next.js)
-        ↓
-Backend (FastAPI)
-        ↓
-Hybrid Retrieval
-   ├── ChromaDB
-   └── BM25
-        ↓
-Gemini API
+```http
+GET  /messages/{conversation_id}
+POST /chat/{conversation_id}
 ```
+
+Example request:
+
+```json
+{
+  "content": "Summarize the uploaded document."
+}
+```
+
+## Future Improvements
+
+* Authentication and user accounts
+* Streaming LLM responses
+* Multi-document collections
+* Source citations in responses
+* PostgreSQL support
+* Background document processing
+
+## License
+
+This project is provided for educational and portfolio purposes.
