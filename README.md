@@ -1,4 +1,4 @@
-# RAG Bot 🤖
+# RAG Bot
 
 A Retrieval-Augmented Generation (RAG) chatbot that allows users to upload PDF and TXT documents and interact with them using natural language.
 
@@ -6,14 +6,14 @@ The application combines semantic vector search, keyword retrieval, reranking, c
 
 ## Features
 
-* 📄 Upload and chat with PDF and TXT documents
-* 🔍 Hybrid retrieval using vector search and BM25 keyword search
-* 🎯 Neural reranking for improved context selection
-* ⚡ Redis-powered caching for faster responses and reduced API usage
-* 🛡️ IP-based rate limiting
-* 💬 Persistent conversation history
-* 🐳 Fully containerized with Docker Compose
-* 📱 Responsive web interface built with Next.js
+* Upload and chat with PDF and TXT documents
+* Hybrid retrieval using vector search and BM25 keyword search
+* Neural reranking for improved context selection
+* Redis-powered caching for faster responses and reduced API usage
+* IP-based rate limiting
+* Persistent conversation history
+* Fully containerized with Docker Compose
+* Responsive web interface built with Next.js
 
 ## Architecture
 
@@ -59,6 +59,7 @@ Backend (FastAPI)
 
 * Docker
 * Docker Compose
+* GitHub Actions
 
 ## Retrieval Pipeline
 
@@ -110,12 +111,6 @@ DATABASE_URL=sqlite:///./data/chat.db
 docker compose up --build
 ```
 
-Services:
-
-* Frontend: http://localhost:3000
-* Backend: http://localhost:8000
-* API Docs: http://localhost:8000/docs
-
 ## API Overview
 
 ### Conversations
@@ -154,7 +149,3 @@ Example request:
 * Source citations in responses
 * PostgreSQL support
 * Background document processing
-
-## License
-
-This project is provided for educational and portfolio purposes.
