@@ -100,3 +100,20 @@ export async function uploadFile(
 
   return response.json();
 }
+
+export async function deleteConversation(conversationId: number) {
+  const response = await fetch(
+    `${BASE_URL}/conversations/${conversationId}`,
+    {
+      method: "DELETE",
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      "Failed to delete conversation"
+    );
+  }
+
+  return response.json();
+}

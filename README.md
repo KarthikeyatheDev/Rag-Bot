@@ -1,43 +1,142 @@
-# RAG Bot
+# 🤖 RAG Bot
 
-A Retrieval-Augmented Generation (RAG) chatbot that allows users to upload PDF and TXT documents and interact with them using natural language.
+> A production-ready Retrieval-Augmented Generation (RAG) chatbot built with **FastAPI**, **Next.js**, **Redis**, **ChromaDB**, and **Google Gemini**.
 
-The application combines semantic vector search, keyword retrieval, reranking, caching, and Google's Gemini API to provide accurate, context-aware responses from uploaded documents.
+RAG Bot enables users to upload documents and chat with them naturally using a hybrid retrieval pipeline combining semantic search, keyword search, reranking, and intelligent caching.
 
-## Features
+---
 
-* Upload and chat with PDF and TXT documents
-* Hybrid retrieval using vector search and BM25 keyword search
-* Neural reranking for improved context selection
-* Redis-powered caching for faster responses and reduced API usage
-* IP-based rate limiting
-* Persistent conversation history
-* Fully containerized with Docker Compose
-* Responsive web interface built with Next.js
+## ✨ Features
 
-## Architecture
+* 📄 Upload PDF and TXT documents
+* 💬 Multi-conversation document chat
+* 🔍 Hybrid Retrieval
 
-```text
-Frontend (Next.js)
-        │
-        ▼
-Backend (FastAPI)
-        │
-        ├── SQLite (Conversations & Metadata)
-        ├── Redis (Caching & Rate Limiting)
-        └── Retrieval Pipeline
-                │
-                ├── ChromaDB Vector Search
-                ├── BM25 Keyword Search
-                └── Cross-Encoder Reranker
-                        │
-                        ▼
-                  Gemini 2.5 Flash
+  * Semantic Search (ChromaDB)
+  * BM25 Keyword Search
+* 🎯 Cross-Encoder Reranking
+* ⚡ Multi-level Caching
+
+  * Response Cache
+  * Embedding Cache
+  * Retrieval Cache
+  * Semantic Cache
+* 🚦 Redis-based Rate Limiting
+* 🧠 Google Gemini 2.5 Flash Integration
+* 🗄️ Persistent Conversation History
+* 🐳 Docker & Docker Compose Support
+* 📱 Modern Next.js + Tailwind UI
+
+---
+
+# Demo
+
+> *(Temporary Placeholder)*
+
+```
+Home Page
+
+Chat Interface
+
+Document Upload
+
+Swagger API
 ```
 
-## Tech Stack
+---
 
-### Backend
+# Architecture
+
+```text
+                        ┌─────────────────────┐
+                        │    Next.js Frontend │
+                        └──────────┬──────────┘
+                                   │ REST API
+                                   ▼
+                        ┌─────────────────────┐
+                        │   FastAPI Backend   │
+                        └──────────┬──────────┘
+                                   │
+         ┌───────────────┬─────────┴──────────┬───────────────┐
+         ▼               ▼                    ▼               ▼
+     SQLite         ChromaDB              Redis          Gemini API
+ Conversations   Vector Database      Cache + Rate       LLM
+ & Metadata                           Limiting
+
+```
+
+---
+
+# RAG Pipeline
+
+```text
+Upload Document
+        │
+        ▼
+Extract Text
+        │
+        ▼
+Chunk Document
+        │
+        ▼
+Generate Embeddings
+        │
+        ▼
+Store in ChromaDB
+        │
+        ▼
+──────────────────────────────────────────────
+
+User Query
+        │
+        ▼
+Embedding Cache
+        │
+        ▼
+Semantic Cache
+        │
+        ▼
+Hybrid Retrieval
+   ├── ChromaDB
+   └── BM25
+        │
+        ▼
+Merge Results
+        │
+        ▼
+Cross Encoder Reranker
+        │
+        ▼
+Prompt Construction
+        │
+        ▼
+Gemini 2.5 Flash
+        │
+        ▼
+Assistant Response
+        │
+        ▼
+Response Cache
+```
+
+---
+
+# Caching Strategy
+
+To improve latency and reduce API usage, the project implements four caching layers.
+
+| Cache           | Purpose                                             |
+| --------------- | --------------------------------------------------- |
+| Embedding Cache | Avoid regenerating embeddings for repeated queries  |
+| Retrieval Cache | Cache retrieval pipeline output                     |
+| Semantic Cache  | Return responses for semantically similar questions |
+| Response Cache  | Return identical responses for repeated prompts     |
+
+---
+
+# Tech Stack
+
+## Backend
 
 * FastAPI
 * SQLAlchemy
@@ -48,92 +147,128 @@ Backend (FastAPI)
 * BM25s
 * Google Gemini API
 
-### Frontend
+## Frontend
 
 * Next.js
 * React
 * TypeScript
 * Tailwind CSS
 
-### Infrastructure
+## Infrastructure
 
 * Docker
 * Docker Compose
-* GitHub Actions
+* GitHub Actions (CI)
 
-## Retrieval Pipeline
+---
 
-1. User uploads a PDF or TXT document.
-2. Text is extracted and split into chunks.
-3. Chunks are embedded using a Sentence Transformer model.
-4. Embeddings are stored in ChromaDB.
-5. BM25 indexes are created for keyword retrieval.
-6. User queries trigger both vector and keyword search.
-7. Retrieved results are merged and reranked.
-8. The top-ranked context is sent to Gemini for response generation.
-
-## Project Structure
+# Project Structure
 
 ```text
 rag-bot/
+│
 ├── backend/
 │   ├── main.py
 │   ├── database.py
-│   ├── schema.py
 │   ├── Model.py
+│   ├── schema.py
+│   ├── requirements.txt
 │   └── utils/
+│       ├── embeddings.py
+│       ├── hybrid_retrieval.py
+│       ├── reranker.py
+│       ├── semantic_cache.py
+│       ├── redis_client.py
+│       └── ...
+│
 ├── frontend/
 │   ├── app/
 │   ├── components/
 │   └── package.json
+│
 ├── docker-compose.yml
-└── README.md
+├── README.md
+└── .github/
+    └── workflows/
 ```
 
-## Getting Started
+---
 
-### Prerequisites
+# Getting Started
 
-* Docker & Docker Compose
+## Prerequisites
 
-### Environment Variables
+* Docker
+* Docker Compose
 
-Create a `.env` file inside the `backend` directory:
+---
+
+## Clone Repository
+
+```bash
+git clone https://github.com/<your-username>/rag-bot.git
+cd rag-bot
+```
+
+---
+
+## Configure Environment
+
+Create:
+
+```text
+backend/.env
+```
 
 ```env
 GEMINI_API_KEY=your_api_key
 DATABASE_URL=sqlite:///./data/chat.db
 ```
 
-### Run with Docker
+---
+
+## Run
 
 ```bash
 docker compose up --build
 ```
 
-## API Overview
+Frontend
 
-### Conversations
+```
+http://localhost:3000
+```
 
-```http
-GET  /conversations
+Swagger
+
+```
+http://localhost:8000/docs
+```
+
+---
+
+# API
+
+## Conversations
+
+```
+GET /conversations
 POST /conversations
 ```
 
-### Documents
+## Upload Documents
 
-```http
+```
 POST /upload/{conversation_id}
 ```
 
-### Messages
+## Chat
 
-```http
-GET  /messages/{conversation_id}
+```
 POST /chat/{conversation_id}
 ```
 
-Example request:
+Example
 
 ```json
 {
@@ -141,11 +276,21 @@ Example request:
 }
 ```
 
-## Future Improvements
+---
 
-* Authentication and user accounts
-* Streaming LLM responses
-* Multi-document collections
-* Source citations in responses
-* PostgreSQL support
-* Background document processing
+# Performance Optimizations
+
+* Hybrid Retrieval (Semantic + BM25)
+* Cross Encoder Reranking
+* Redis Response Cache
+* Embedding Cache
+* Semantic Cache
+* Retrieval Cache
+* Dockerized Deployment
+* Production-ready API Structure
+
+---
+
+# License
+
+This project is licensed under the MIT License.

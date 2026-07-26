@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import ChatInput from "@/components/chatInput";
 import ChatMessage from "@/components/chatMessages";
-import { fetchMessages, sendMessage, createConversation, fetchConversations, uploadFile } from "./api";
+import { fetchMessages, sendMessage, createConversation, fetchConversations, uploadFile, deleteConversation } from "./api";
 
 type Attachment = {
   name: string;
@@ -53,6 +53,14 @@ function SparkleIcon() {
         fill="currentColor"
         opacity="0.6"
       />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 shrink-0">
+      <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -158,6 +166,19 @@ export default function Home() {
     }
   };
 
+  const handleDeleteChat = async (id: number) => {
+    try {
+      await deleteConversation(id);
+      setConvoList((prev) => prev.filter((c) => c.id !== id));
+      if (selectedConvo?.id === id) {
+        setSelectedConvo(null);
+        setMessages([]);
+      }
+    } catch (error) {
+      console.error("Error deleting conversation:", error);
+    }
+  };
+
   const handleSend = async () => {
     if (isLoading || !input.trim() || !selectedConvo?.id) return;
 
@@ -201,21 +222,34 @@ export default function Home() {
           .slice()
           .reverse()
           .map((conversation) => (
-            <button
+            <div
               key={conversation.id}
-              onClick={() => {
-                setSelectedConvo(conversation);
-                setIsSidebarOpen(false);
-              }}
-              className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm transition ${
+              className={` flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm transition ${
                 selectedConvo?.id === conversation.id
                   ? "bg-white/[0.08] text-stone-100"
                   : "text-stone-400 hover:bg-white/[0.04] hover:text-stone-200"
               }`}
             >
-              <ChatIcon />
-              <span className="truncate">Conversation {conversation.id}</span>
-            </button>
+              <button
+                onClick={() => {
+                  setSelectedConvo(conversation);
+                  setIsSidebarOpen(false);
+                }}
+                className="flex flex-1 items-center gap-2.5 text-left truncate"
+              >
+                <ChatIcon />
+                <span className="truncate">Conversation {conversation.id}</span>
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteChat(conversation.id);
+                }}
+                className="ml-2 shrink-0 rounded-md p-1 text-stone-400 transition hover:bg-red-500/10 hover:text-red-400"
+              >
+                <TrashIcon />
+              </button>
+            </div>
           ))}
       </div>
     </>
