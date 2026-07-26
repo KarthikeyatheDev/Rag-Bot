@@ -1,9 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --background: #020617;
-  --foreground: #e2e8f0;
-  --surface: rgba(15, 23, 42, 0.9);
+  --background: #0a0c10;
+  --foreground: #e7e5df;
+  --surface: rgba(18, 20, 26, 0.92);
+  --accent: #e8a13d;
+  --accent-soft: rgba(232, 161, 61, 0.14);
 }
 
 @theme inline {
@@ -20,10 +22,7 @@ html {
 body {
   min-height: 100%;
   margin: 0;
-  background-image:
-    radial-gradient(circle at top left, rgba(34, 211, 238, 0.19), transparent 25%),
-    radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.16), transparent 20%),
-    linear-gradient(180deg, #020617 0%, #0f172a 100%);
+  background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
   text-rendering: optimizeLegibility;
@@ -34,8 +33,8 @@ body {
 }
 
 ::selection {
-  background: rgba(6, 182, 212, 0.35);
-  color: #f8fafc;
+  background: rgba(232, 161, 61, 0.35);
+  color: #fffaf0;
 }
 
 button,
@@ -45,20 +44,17 @@ textarea {
 }
 
 textarea {
-  resize: vertical;
+  resize: none;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background-image: radial-gradient(circle at 20% 10%, rgba(56, 189, 248, 0.06), transparent 18%),
-    radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.08), transparent 16%);
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -66,10 +62,49 @@ body::before {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.24);
+  background: rgba(231, 229, 223, 0.14);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.4);
+  background: rgba(231, 229, 223, 0.24);
+}
+
+@keyframes message-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-message-in {
+  animation: message-in 0.28s ease-out;
+}
+
+@keyframes typing-dot {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  30% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
+.typing-dot {
+  animation: typing-dot 1.1s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-message-in,
+  .typing-dot {
+    animation: none;
+  }
 }
