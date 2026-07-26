@@ -55,10 +55,13 @@ messages = [
     {"id": 2, "role": "user", "content": "Hi there!"},
 ]
 
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "https://rag-bot-nu.vercel.app",
+    ],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -220,12 +223,16 @@ def upload_file(
 @app.delete("/conversations/{conversation_id}")
 def delete_conversation(conversation_id: int, db: Session = Depends(get_db)):
     # Check if conversation exists
-    conversation = db.query(Conversation).filter(Conversation.id == conversation_id).first()
+    conversation = (
+        db.query(Conversation).filter(Conversation.id == conversation_id).first()
+    )
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
 
     # Find all documents to delete associated files
-    documents = db.query(Document).filter(Document.conversation_id == conversation_id).all()
+    documents = (
+        db.query(Document).filter(Document.conversation_id == conversation_id).all()
+    )
 
     for doc in documents:
         # Delete file if it exists

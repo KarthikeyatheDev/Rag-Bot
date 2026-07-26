@@ -1,4 +1,10 @@
-const BASE_URL = "http://localhost:8000";
+declare const process: {
+  env: {
+    NEXT_PUBLIC_API_URL: string;
+  };
+};
+
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function fetchMessages(
   conversationId: number
