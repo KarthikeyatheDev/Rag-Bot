@@ -96,7 +96,7 @@ from Model import Chunk, Document
 from utils.redis_client import get_cache, set_cache
 from utils.semantic_cache import get_semantic_cache, save_semantic_cache
 from utils.bm25_retreival import keyword_retrieval
-from utils.vector_store import collection
+from utils.vector_store import get_collection
 from utils.embeddings import generate_embedding
 from utils.reranker import rerank
 
@@ -175,6 +175,7 @@ def rag_pipeline(
     # Chroma Retrieval
     # -------------------------
 
+    collection = get_collection()
     query_result = collection.query(
         query_embeddings=[query_embedding],
         n_results=5,

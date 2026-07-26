@@ -1,14 +1,13 @@
 # utils/semantic_cache.py
 
 import uuid
-from utils.vector_store import chroma_client
-
-semantic_cache = chroma_client.get_or_create_collection(name="semantic-cache")
+from utils.vector_store import get_semantic_cache_collection
 
 SIMILARITY_THRESHOLD = 0.85
 
 
 def get_semantic_cache(query_embedding, conversation_id):
+    semantic_cache = get_semantic_cache_collection()
     result = semantic_cache.query(
         query_embeddings=[query_embedding],
         n_results=1,
@@ -31,6 +30,7 @@ def get_semantic_cache(query_embedding, conversation_id):
 
 
 def save_semantic_cache(query_embedding, query_text, response, conversation_id):
+    semantic_cache = get_semantic_cache_collection()
     semantic_cache.add(
         ids=[str(uuid.uuid4())],
         embeddings=[query_embedding],

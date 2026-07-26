@@ -17,7 +17,7 @@ from Model import Message, Conversation
 from utils.extractor import extract_text
 from utils.chunker import chunk_text
 from utils.embeddings import generate_embedding
-from utils.vector_store import collection
+from utils.vector_store import get_collection
 from utils.redis_client import get_cache, set_cache
 from utils.rag_orchestrator import rag_pipeline
 from fastapi import Request
@@ -37,7 +37,11 @@ load_dotenv()
 
 api_key = os.getenv("GEMINI_API_KEY")
 
-client = genai.Client(api_key=api_key)
+from functools import lru_cache
+
+@lru_cache(maxsize=1)
+def get_gemini_client():
+    return genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
 model_name = "gemini-2.5-flash"
 
@@ -142,7 +146,7 @@ def chat(conversation_id: int, message: MessageCreate, db: Session = Depends(get
             message_content=message.content,
             db=db,
             model=model_name,
-            client=client,
+            client=get_gemini_client(),
             conversation_history=conversation,
         )
         assistant_content = result["response"]
@@ -203,6 +207,7 @@ def upload_file(
         db.add(chunk_entry)
         db.flush()
 
+        collection = get_collection()
         collection.add(
             documents=[chunk],
             embeddings=[embedding],
@@ -247,6 +252,7 @@ def delete_conversation(conversation_id: int, db: Session = Depends(get_db)):
 
     # Delete from chroma db
     try:
+        collection = get_collection()
         collection.delete(where={"conversation_id": int(conversation_id)})
     except Exception as e:
         print(f"Error deleting from chroma: {e}")

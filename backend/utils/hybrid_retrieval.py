@@ -2,7 +2,7 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 from Model import Chunk, Document
 from database import get_db
-from utils.vector_store import collection
+from utils.vector_store import get_collection
 from utils.chunker import chunk_text
 from utils.embeddings import generate_embedding
 from utils.bm25_retreival import keyword_retrieval
@@ -36,6 +36,7 @@ def hybrid_retrieval(
     if semantic_hit:
         return [semantic_hit]
 
+    collection = get_collection()
     query_result = collection.query(
         query_embeddings=[query_embedding],
         n_results=5,
