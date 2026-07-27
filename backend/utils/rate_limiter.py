@@ -6,7 +6,8 @@ WINDOW_SECONDS = 60
 
 
 def check_rate_limit(request: Request):
-    client_ip = request.client.host
+    client_ip = request.client.host if request.client else "unknown"
+
 
     key = f"rate:{client_ip}"
 
