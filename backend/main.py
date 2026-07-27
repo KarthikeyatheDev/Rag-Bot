@@ -52,10 +52,6 @@ model_name = "gemini-2.5-flash"
 app = FastAPI()
 
 
-# Which library has the digital archive room?
-# When did East Library open?
-# Which library is the newest?
-
 Base.metadata.create_all(bind=engine)
 
 messages = [
