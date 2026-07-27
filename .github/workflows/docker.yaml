@@ -1,4 +1,4 @@
-name: Build Docker Images for RAG Application
+name: CI/CD - RAG Bot
 
 on:
   push:
@@ -62,3 +62,35 @@ jobs:
 
       - name: Build Frontend Docker Image
         run: docker build -t rag-frontend .
+
+  deploy:
+    if: github.event_name == 'push'
+    needs:
+      - backend-build
+      - frontend-build
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+
+            cd ~/Rag-Bot
+
+            echo "Pulling latest code..."
+            git fetch origin
+            git reset --hard origin/main
+
+            echo "Rebuilding application..."
+            docker compose up -d --build --remove-orphans
+
+            echo "Removing dangling images..."
+            docker image prune -af --filter "until=24h"
+
+            echo "Deployment completed successfully."
