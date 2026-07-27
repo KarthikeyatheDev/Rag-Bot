@@ -6,13 +6,15 @@ import uuid
 
 from click import prompt
 from fastapi import Depends, FastAPI, UploadFile, File, HTTPException
+from sqlalchemy import func
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 
 from database import get_db, engine
 
 from Model import Base, Chunk, Document
-from schema import MessageCreate
+from schema import MessageCreate, ConversationUpdate
 from Model import Message, Conversation
 from utils.extractor import extract_text
 from utils.chunker import chunk_text
@@ -93,6 +95,9 @@ def get_conversations(db: Session = Depends(get_db)):
 @app.post("/conversations")
 def create_conversation(db: Session = Depends(get_db)):
 
+    count = db.query(func.count(Conversation.id)).scalar() or 0
+
+    conversation = Conversation(title=f"Conversation {count + 1}")
     conversation = Conversation()
 
     db.add(conversation)
@@ -103,6 +108,16 @@ def create_conversation(db: Session = Depends(get_db)):
 
     return conversation
 
+@app.put("/conversations/{conversation_id}")
+def update_conversation(conversation_id: int, payload: ConversationUpdate, db: Session = Depends(get_db)):
+    conversation = db.query(Conversation).filter(Conversation.id == conversation_id).first()
+    if not conversation:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    
+    conversation.title = payload.title
+    db.commit()
+    db.refresh(conversation)
+    return conversation
 
 @app.get("/messages/{conversation_id}")
 def get_messages(conversation_id: int, db: Session = Depends(get_db)):
@@ -224,9 +239,7 @@ def upload_file(
 def delete_conversation(conversation_id: int, db: Session = Depends(get_db)):
     # Check if conversation exists
     conversation = (
-        db.query(Conversation)
-        .filter(Conversation.id == conversation_id)
-        .first()
+        db.query(Conversation).filter(Conversation.id == conversation_id).first()
     )
 
     if not conversation:
@@ -234,9 +247,7 @@ def delete_conversation(conversation_id: int, db: Session = Depends(get_db)):
 
     # Get all documents
     documents = (
-        db.query(Document)
-        .filter(Document.conversation_id == conversation_id)
-        .all()
+        db.query(Document).filter(Document.conversation_id == conversation_id).all()
     )
 
     # Delete all chunks belonging to those documents
@@ -251,14 +262,10 @@ def delete_conversation(conversation_id: int, db: Session = Depends(get_db)):
         print(f"Error deleting from ChromaDB: {e}")
 
     # Delete documents
-    db.query(Document).filter(
-        Document.conversation_id == conversation_id
-    ).delete()
+    db.query(Document).filter(Document.conversation_id == conversation_id).delete()
 
     # Delete messages
-    db.query(Message).filter(
-        Message.conversation_id == conversation_id
-    ).delete()
+    db.query(Message).filter(Message.conversation_id == conversation_id).delete()
 
     # Delete conversation
     db.delete(conversation)

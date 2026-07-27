@@ -18,6 +18,7 @@ type Message = {
 
 type Conversation = {
   id: number;
+  title: string;
 };
 
 function PlusIcon() {
@@ -224,11 +225,10 @@ export default function Home() {
           .map((conversation) => (
             <div
               key={conversation.id}
-              className={` flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm transition ${
-                selectedConvo?.id === conversation.id
+              className={` flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm transition ${selectedConvo?.id === conversation.id
                   ? "bg-white/[0.08] text-stone-100"
                   : "text-stone-400 hover:bg-white/[0.04] hover:text-stone-200"
-              }`}
+                }`}
             >
               <button
                 onClick={() => {
@@ -238,7 +238,7 @@ export default function Home() {
                 className="flex flex-1 items-center gap-2.5 text-left truncate"
               >
                 <ChatIcon />
-                <span className="truncate">Conversation {conversation.id}</span>
+                <span className="truncate">{conversation.title}</span>
               </button>
               <button
                 onClick={(e) => {

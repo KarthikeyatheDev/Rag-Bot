@@ -12,3 +12,6 @@ class MessageResponse(BaseModel):
     
 class ConversationCreate(BaseModel):
     pass
+
+class ConversationUpdate(BaseModel):
+    title: str
