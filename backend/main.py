@@ -39,9 +39,11 @@ api_key = os.getenv("GEMINI_API_KEY")
 
 from functools import lru_cache
 
+
 @lru_cache(maxsize=1)
 def get_gemini_client():
     return genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+
 
 model_name = "gemini-2.5-flash"
 
