@@ -224,41 +224,43 @@ def upload_file(
 def delete_conversation(conversation_id: int, db: Session = Depends(get_db)):
     # Check if conversation exists
     conversation = (
-        db.query(Conversation).filter(Conversation.id == conversation_id).first()
+        db.query(Conversation)
+        .filter(Conversation.id == conversation_id)
+        .first()
     )
+
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
 
-    # Find all documents to delete associated files
+    # Get all documents
     documents = (
-        db.query(Document).filter(Document.conversation_id == conversation_id).all()
+        db.query(Document)
+        .filter(Document.conversation_id == conversation_id)
+        .all()
     )
 
+    # Delete all chunks belonging to those documents
     for doc in documents:
-        # Delete file if it exists
-        if doc.filepath and os.path.exists(doc.filepath):
-            try:
-                os.remove(doc.filepath)
-            except Exception as e:
-                print(f"Error deleting file {doc.filepath}: {e}")
-
-        # Delete chunks for this document from SQLite
         db.query(Chunk).filter(Chunk.document_id == doc.id).delete()
 
-    # Delete from chroma db
+    # Delete embeddings from Chroma
     try:
         collection = get_collection()
         collection.delete(where={"conversation_id": int(conversation_id)})
     except Exception as e:
-        print(f"Error deleting from chroma: {e}")
+        print(f"Error deleting from ChromaDB: {e}")
 
-    # Delete documents from SQLite
-    db.query(Document).filter(Document.conversation_id == conversation_id).delete()
+    # Delete documents
+    db.query(Document).filter(
+        Document.conversation_id == conversation_id
+    ).delete()
 
-    # Delete messages from SQLite
-    db.query(Message).filter(Message.conversation_id == conversation_id).delete()
+    # Delete messages
+    db.query(Message).filter(
+        Message.conversation_id == conversation_id
+    ).delete()
 
-    # Delete conversation from SQLite
+    # Delete conversation
     db.delete(conversation)
 
     db.commit()
