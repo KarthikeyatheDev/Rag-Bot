@@ -64,6 +64,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "https://rag-bot-nu.vercel.app",
+        "http://13.219.72.7:3000/",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -102,7 +103,6 @@ def create_conversation(db: Session = Depends(get_db)):
     db.refresh(conversation)
 
     return conversation
-
 
 
 @app.get("/messages/{conversation_id}")
