@@ -175,20 +175,13 @@ def upload_file(
     conversation_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)
 ):
 
-    UPLOAD_DIR = "/app/uploads"
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    file_bytes = file.file.read()
 
-    safe_filename = f"{uuid.uuid4()}_{file.filename}"
-    file_path = os.path.join(UPLOAD_DIR, safe_filename)
-
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-
-    content = extract_text(file_path, str(file.filename))
+    content = extract_text(file_bytes, file.filename)
     chunks = chunk_text(content)
+
     document = Document(
         filename=file.filename,
-        filepath=file_path,
         content=content,
         conversation_id=conversation_id,
     )

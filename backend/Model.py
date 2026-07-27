@@ -34,7 +34,6 @@ class Document(Base):
 
     filename = Column(String)
 
-    filepath = Column(String)
 
     conversation_id = Column(
         Integer,
