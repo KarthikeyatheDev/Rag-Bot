@@ -17,6 +17,8 @@ services:
   frontend:
     build:
       context: ./frontend
+    env_file:
+      - ./frontend/.env
     container_name: rag_frontend
     ports:
       - "3000:3000"
