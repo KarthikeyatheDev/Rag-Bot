@@ -87,7 +87,8 @@ jobs:
             git reset --hard origin/main
 
             echo "Rebuilding application..."
-            docker compose up -d --build --remove-orphans
+            docker compose build --no-cache
+            docker compose up -d --remove-orphans
 
             echo "Removing dangling images..."
             docker image prune -af --filter "until=24h"
