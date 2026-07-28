@@ -60,18 +60,6 @@ Base.metadata.create_all(bind=engine)
 #     {"id": 2, "role": "user", "content": "Hi there!"},
 # ]
 
-
-@app.middleware("http")
-async def rate_limit_middleware(request, call_next):
-
-    if request.url.path.startswith("/chat"):
-        check_rate_limit(request)
-
-    response = await call_next(request)
-
-    return response
-
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -83,6 +71,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.middleware("http")
+async def rate_limit_middleware(request, call_next):
+
+    if request.url.path.startswith("/chat"):
+        check_rate_limit(request)
+
+    response = await call_next(request)
+
+    return response
+
 
 
 @app.get("/conversations")
